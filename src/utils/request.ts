@@ -1,18 +1,17 @@
 import { useMemberStore } from '@/stores'
 
-const BaseUrl = 'https://pcapi-xiaotuxian-front-devtest.itheima.net'
+const baseURL = 'https://pcapi-xiaotuxian-front-devtest.itheima.net'
 
 const memberStore = useMemberStore()
 
 const requestInterceptor = {
   invoke(options: UniApp.RequestOptions) {
-    if (options.url.startsWith('http')) options.url = BaseUrl + options.url
+    if (!options.url.startsWith('http')) options.url = baseURL + options.url
     options.timeout = 10000
     options.header = {
       ...options.header,
       'source-client': 'miniapp',
     }
-
     const token = memberStore.profile?.token
     if (token) options.header.Authorization = token
   },

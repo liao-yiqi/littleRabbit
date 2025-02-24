@@ -1,10 +1,7 @@
 <template>
-  <view class="content">
-    <image class="logo" src="/static/logo.png" />
-    <view class="text-area">
-      <text class="title">{{ title }}</text>
-    </view>
-  </view>
+ <view>
+  123
+ </view>
 </template>
 
 <script setup lang="ts">

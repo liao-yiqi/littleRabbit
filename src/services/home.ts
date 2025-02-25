@@ -1,4 +1,4 @@
-import type { BannerItem, CategoryItem } from '@/types/home'
+import type { BannerItem, CategoryItem, HotItem } from '@/types/home'
 import { request } from '@/utils/request'
 
 // 获取轮播图
@@ -16,6 +16,14 @@ export const getHomeBannerAPI = (distributionSite = 1) => {
 export const getHomeCategoryAPI = () => {
   return request<CategoryItem[]>({
     url: '/home/category/mutli',
+    method: 'GET',
+  })
+}
+
+// 获取热门推荐
+export const getHomeHotAPI = () => {
+  return request<HotItem[]>({
+    url: '/home/hot/mutli',
     method: 'GET',
   })
 }

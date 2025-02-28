@@ -3,7 +3,7 @@
     <!-- logo文字 -->
     <view class="logo">
       <image class="logo-image" src="@/static/images/logo.png"></image>
-      <text class="logo-text">新鲜 · 亲民 · 快捷</text>
+      <text class="logo-text">xx · xx · xx</text>
     </view>
     <!-- 搜索条 -->
     <view class="search">

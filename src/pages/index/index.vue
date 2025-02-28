@@ -1,9 +1,19 @@
 <template>
   <view class="viewport">
     <CustomNavbar />
-    <XtxSwiper :list="bannerList" />
-    <CategoryPanel :list="categoryList" />
-    <HotPanel :list="hotItemList"/>
+    <scroll-view
+      refresher-enabled
+      scroll-y
+      class="scroll-view"
+      :refresher-triggered="isTriggered"
+      @scrolltolower="onScrolltolower"
+      @refresherrefresh="onRefresh"
+    >
+      <XtxSwiper :list="bannerList" />
+      <CategoryPanel :list="categoryList" />
+      <HotPanel :list="hotItemList" />
+      <XtxGuess ref="guessRef" />
+    </scroll-view>
   </view>
 </template>
 <script setup lang="ts">
@@ -14,6 +24,7 @@ import { ref } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
 import type { BannerItem, CategoryItem, HotItem } from '@/types/home'
 import { getHomeBannerAPI, getHomeCategoryAPI, getHomeHotAPI } from '@/services/home'
+import type { XtxGuessInstance } from '@/types/components'
 
 const bannerList = ref<BannerItem[]>([])
 const getHomeBannerData = async () => {
@@ -32,6 +43,18 @@ const getHomeHotData = async () => {
   const { result } = await getHomeHotAPI()
   hotItemList.value = result
 }
+
+const guessRef = ref<XtxGuessInstance>()
+
+const onScrolltolower = () => guessRef.value?.getMore()
+
+const isTriggered = ref(false)
+const onRefresh = async () => {
+  isTriggered.value = true
+  await Promise.allSettled([getHomeBannerData(), getHomeCategoryData(), getHomeHotData()])
+  isTriggered.value = false
+}
+
 onLoad(async () => {
   await Promise.allSettled([getHomeBannerData(), getHomeCategoryData(), getHomeHotData()])
 })
@@ -47,5 +70,9 @@ page {
   height: 100%;
   display: flex;
   flex-direction: column;
+  .scroll-view {
+    flex: 1;
+    overflow: hidden;
+  }
 }
 </style>

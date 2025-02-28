@@ -1,3 +1,5 @@
+import type { GoodsItem } from './global'
+
 // 轮播图类型
 export type BannerItem = {
   hrefUrl: string
@@ -17,8 +19,11 @@ export type CategoryItem = {
 export type HotItem = {
   alt: string
   id: string
-  picture: string
+  pictures: string
   target: string
   title: string
   type: string
 }
+
+// 猜你喜欢类别
+export type GuessItem = GoodsItem

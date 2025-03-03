@@ -51,7 +51,12 @@ const onScrolltolower = () => guessRef.value?.getMore()
 const isTriggered = ref(false)
 const onRefresh = async () => {
   isTriggered.value = true
-  await Promise.allSettled([getHomeBannerData(), getHomeCategoryData(), getHomeHotData()])
+  await Promise.allSettled([
+    getHomeBannerData(),
+    getHomeCategoryData(),
+    getHomeHotData(),
+    guessRef.value?.resetData(),
+  ])
   isTriggered.value = false
 }
 

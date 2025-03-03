@@ -45,12 +45,19 @@ const getGuessLikeData = async () => {
   pageParams.page < result.pages ? pageParams.page++ : (finish.value = true)
 }
 
+const resetData = () => {
+  pageParams.page = 1
+  guessLikeList.value = []
+  finish.value = false
+}
+
 onMounted(() => {
   getGuessLikeData()
 })
 
 defineExpose({
   getMore: getGuessLikeData,
+  resetData,
 })
 </script>
 <style lang="scss" scoped>

@@ -9,10 +9,13 @@
       @scrolltolower="onScrolltolower"
       @refresherrefresh="onRefresh"
     >
-      <XtxSwiper :list="bannerList" />
-      <CategoryPanel :list="categoryList" />
-      <HotPanel :list="hotItemList" />
-      <XtxGuess ref="guessRef" />
+      <PageSkeleton v-if="isLoading" />
+      <template v-else>
+        <XtxSwiper :list="bannerList" />
+        <CategoryPanel :list="categoryList" />
+        <HotPanel :list="hotItemList" />
+        <XtxGuess ref="guessRef" />
+      </template>
     </scroll-view>
   </view>
 </template>
@@ -20,6 +23,7 @@
 import CustomNavbar from './components/CustomNavbar.vue'
 import CategoryPanel from './components/CategoryPanel.vue'
 import HotPanel from './components/HotPanel.vue'
+import PageSkeleton from "./components/PageSkeleton.vue";
 import { ref } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
 import type { BannerItem, CategoryItem, HotItem } from '@/types/home'
@@ -48,20 +52,22 @@ const guessRef = ref<XtxGuessInstance>()
 
 const onScrolltolower = () => guessRef.value?.getMore()
 
+const isLoading = ref(false)
+const getPageData = async () => {
+  isLoading.value = true
+  await Promise.allSettled([getHomeBannerData(), getHomeCategoryData(), getHomeHotData()])
+  isLoading.value = false
+}
+
 const isTriggered = ref(false)
 const onRefresh = async () => {
   isTriggered.value = true
-  await Promise.allSettled([
-    getHomeBannerData(),
-    getHomeCategoryData(),
-    getHomeHotData(),
-    guessRef.value?.resetData(),
-  ])
+  await Promise.allSettled([getPageData(), guessRef.value?.resetData()])
   isTriggered.value = false
 }
 
-onLoad(async () => {
-  await Promise.allSettled([getHomeBannerData(), getHomeCategoryData(), getHomeHotData()])
+onLoad(() => {
+  getPageData()
 })
 </script>
 

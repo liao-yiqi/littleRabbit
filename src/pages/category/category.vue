@@ -1,5 +1,5 @@
 <template>
-  <view class="viewport">
+  <view class="viewport" v-if="isFinished">
     <!-- 搜索框 -->
     <view class="search">
       <view class="input">
@@ -50,6 +50,7 @@
       </scroll-view>
     </view>
   </view>
+  <PageSkeleton v-else />
 </template>
 
 <script setup lang="ts">
@@ -59,6 +60,7 @@ import type { CategoryTopItem } from '@/types/category'
 import type { BannerItem } from '@/types/home'
 import { onLoad } from '@dcloudio/uni-app'
 import { computed, ref } from 'vue'
+import PageSkeleton from './components/PageSkeleton.vue'
 
 const bannerList = ref<BannerItem[]>([])
 
@@ -69,6 +71,7 @@ const getBannerData = async () => {
 
 const categoryTopList = ref<CategoryTopItem[]>([])
 const activeIndex = ref(0)
+const isFinished = ref(false)
 const getCategoryTopData = async () => {
   const { result } = await getCategoryTopAPI()
   categoryTopList.value = result
@@ -80,6 +83,7 @@ const subCategoryTopList = computed(() => {
 
 onLoad(async () => {
   await Promise.allSettled([getBannerData(), getCategoryTopData()])
+  isFinished.value = true
 })
 </script>
 

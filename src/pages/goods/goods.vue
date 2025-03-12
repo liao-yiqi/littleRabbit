@@ -6,7 +6,7 @@
       <view class="preview">
         <swiper circular style="height: 750rpx" @change="swiperChange">
           <swiper-item v-for="image in goods?.mainPictures" :key="image">
-            <image mode="aspectFill" :src="image" class="image" />
+            <image mode="aspectFill" :src="image" class="image" @tap="onImageTap(image)" />
           </swiper-item>
         </swiper>
         <view class="indicator">
@@ -32,11 +32,11 @@
           <text class="label">选择</text>
           <text class="text ellipsis"> 请选择商品规格 </text>
         </view>
-        <view class="item arrow">
+        <view class="item arrow" @tap="openPopup('address')">
           <text class="label">送至</text>
           <text class="text ellipsis"> 请选择收获地址 </text>
         </view>
-        <view class="item arrow">
+        <view @tap="openPopup('service')" class="item arrow">
           <text class="label">服务</text>
           <text class="text ellipsis"> 无忧退 快速退款 免费包邮 </text>
         </view>
@@ -105,6 +105,12 @@
       <view class="buynow"> 立即购买 </view>
     </view>
   </view>
+
+  <!-- 弹出层 -->
+  <uni-popup ref="popup" background-color="#fff">
+    <AddressPanel v-if="popupName === 'address'" @close="popup?.close()" />
+    <ServicePanel v-if="popupName === 'service'" @close="popup?.close()" />
+  </uni-popup>
 </template>
 
 <script setup lang="ts">
@@ -112,6 +118,8 @@ import { getGoodsByIdAPI } from '@/services/goods'
 import type { GoodsResult } from '@/types/goods'
 import { onLoad } from '@dcloudio/uni-app'
 import { ref } from 'vue'
+import AddressPanel from './components/AddressPanel.vue'
+import ServicePanel from './components/ServicePanel.vue'
 
 const { safeAreaInsets } = uni.getSystemInfoSync()
 const queryProps = defineProps<{
@@ -125,12 +133,32 @@ const getGoodsDetailsData = async () => {
 }
 const bannerIndex = ref(0)
 const swiperChange: UniHelper.SwiperOnChange = (ev) => {
-  bannerIndex.value = ev.detail.current
+  bannerIndex.value = ev.detail!.current
 }
+
+const onImageTap = (url: string) => {
+  uni.previewImage({
+    current: url,
+    urls: goods.value!.mainPictures,
+  })
+}
+
+const popup = ref<{
+  open: (type?: 'top' | 'bottom') => void
+  close: () => void
+}>()
+
+const popupName = ref<'address' | 'service'>()
+const openPopup = (name: typeof popupName.value) => {
+  popupName.value = name
+  popup.value?.open('bottom')
+}
+
 onLoad(() => {
   getGoodsDetailsData()
 })
 </script>
+
 <style lang="scss" scoped>
 page {
   height: 100%;

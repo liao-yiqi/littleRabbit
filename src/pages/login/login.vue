@@ -54,7 +54,8 @@ const login = (profile: LoginResult) => {
   memberStore.setProfile(profile)
   uni.showToast({ icon: 'success', title: '登录成功', mask: true })
   setTimeout(() => {
-    uni.switchTab({ url: '/pages/my/my' })
+    // uni.switchTab({ url: '/pages/my/my' })
+    uni.navigateBack()
   }, 500)
 }
 </script>

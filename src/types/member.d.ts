@@ -2,7 +2,7 @@ type BaseProfile = {
   id: number
   avatar: string
   account: string
-  nickName?: string
+  nickname?: string
 }
 
 export type LoginResult = BaseProfile & {

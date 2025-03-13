@@ -37,8 +37,7 @@
 		{
 			"path": "pages/my/my",
 			"style": {
-				"navigationStyle": "custom",
-				"navigationBarTextStyle": "white",
+				// "navigationBarTextStyle": "white",
 				"navigationBarTitleText": "我的"
 			}
 		},
@@ -53,6 +52,12 @@
 			/* "style": {
 				"navigationBarTitleText": "热门推荐"
 			} */
+		},
+		{
+			"path": "pages/login/login",
+			"style": {
+				"navigationBarTitleText": "登录"
+			}
 		}
 	],
 	"tabBar": {

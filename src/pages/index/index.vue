@@ -23,12 +23,13 @@
 import CustomNavbar from './components/CustomNavbar.vue'
 import CategoryPanel from './components/CategoryPanel.vue'
 import HotPanel from './components/HotPanel.vue'
-import PageSkeleton from "./components/PageSkeleton.vue";
+import PageSkeleton from './components/PageSkeleton.vue'
 import { ref } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
 import type { BannerItem, CategoryItem, HotItem } from '@/types/home'
 import { getHomeBannerAPI, getHomeCategoryAPI, getHomeHotAPI } from '@/services/home'
 import type { XtxGuessInstance } from '@/types/components'
+import { useGuessList } from '@/composables'
 
 const bannerList = ref<BannerItem[]>([])
 const getHomeBannerData = async () => {
@@ -48,9 +49,7 @@ const getHomeHotData = async () => {
   hotItemList.value = result
 }
 
-const guessRef = ref<XtxGuessInstance>()
-
-const onScrolltolower = () => guessRef.value?.getMore()
+const { guessRef, onScrolltolower } = useGuessList()
 
 const isLoading = ref(false)
 const getPageData = async () => {

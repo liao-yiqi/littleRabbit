@@ -12,17 +12,16 @@
       <!-- 小程序端授权登录 -->
       <button class="button phone" open-type="getPhoneNumber" @getphonenumber="onGetphonenumber">
         <text class="icon icon-phone"></text>
-        手机号快捷登录
+        微信快捷登录
       </button>
       <view class="extra">
         <view class="caption">
           <text>其他登录方式</text>
         </view>
         <view class="options">
-          <!-- <button>
-            <text class="icon icon-phone">模拟快捷登录</text>
-          </button> -->
-          <text class="icon icon-phone">QQ</text>
+          <button>
+            <text class="icon icon-phone">手机号快捷登录</text>
+          </button>
         </view>
       </view>
       <view class="tips">登录/注册即视为你同意《服务条款》和《小兔鲜儿隐私协议》</view>

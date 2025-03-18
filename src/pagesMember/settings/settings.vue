@@ -1,9 +1,24 @@
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+import { useMemberStore } from '@/stores'
+
+const memberStore = useMemberStore()
+const onLogout = () => {
+  uni.showModal({
+    content: '是否退出登录？',
+    confirmColor: '#27BA9B',
+    success: (success) => {
+      if (!success.confirm) return
+      memberStore.clearProfile()
+      uni.navigateBack()
+    },
+  })
+}
+</script>
 
 <template>
   <view class="viewport">
     <!-- 列表1 -->
-    <view class="list" v-if="true">
+    <view class="list" v-if="memberStore.profile">
       <navigator url="/pagesMember/address/address" hover-class="none" class="item arrow">
         我的收货地址
       </navigator>
@@ -20,7 +35,7 @@
     </view>
     <!-- 操作按钮 -->
     <view class="action">
-      <view class="button">退出登录</view>
+      <view class="button" @tap="onLogout" v-if="memberStore.profile">退出登录</view>
     </view>
   </view>
 </template>

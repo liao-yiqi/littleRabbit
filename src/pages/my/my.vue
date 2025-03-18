@@ -1,15 +1,21 @@
 <script setup lang="ts">
 import Profile from './components/Profile.vue'
-import { ref } from 'vue'
 import { useGuessList } from '@/composables'
 
-const { guessRef, onScrolltolower } = useGuessList()
+const { guessRef, onScrolltolower, isTriggered, onRefresh } = useGuessList()
 </script>
 
 <template>
   <view class="viewport">
     <Profile />
-    <scroll-view class="scroll-view" scroll-y @scrolltolower="onScrolltolower">
+    <scroll-view
+      class="scroll-view"
+      scroll-y
+      refresher-enabled
+      :refresher-triggered="isTriggered"
+      @scrolltolower="onScrolltolower"
+      @refresherrefresh="onRefresh"
+    >
       <view class="guess">
         <XtxGuess ref="guessRef" />
       </view>

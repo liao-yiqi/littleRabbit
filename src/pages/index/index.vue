@@ -28,7 +28,6 @@ import { ref } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
 import type { BannerItem, CategoryItem, HotItem } from '@/types/home'
 import { getHomeBannerAPI, getHomeCategoryAPI, getHomeHotAPI } from '@/services/home'
-import type { XtxGuessInstance } from '@/types/components'
 import { useGuessList } from '@/composables'
 
 const bannerList = ref<BannerItem[]>([])

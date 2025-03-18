@@ -45,9 +45,10 @@ const getGuessLikeData = async () => {
   pageParams.page < result.pages ? pageParams.page++ : (finish.value = true)
 }
 
-const resetData = () => {
+const resetData = async () => {
   pageParams.page = 1
   guessLikeList.value = []
+  await getGuessLikeData()
   finish.value = false
 }
 

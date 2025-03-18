@@ -78,13 +78,14 @@ const onSubmit = async () => {
     cityCode: fullLocationCode[1] || '',
     countyCode: fullLocationCode[2] || '',
   })
-  await putMemberProfileAPI(params)
+  const { result } = await putMemberProfileAPI(params)
+  memberStore.profile!.nickname = result.nickname
+  uni.navigateBack()
   uni.showToast({
     title: '保存成功',
     icon: 'success',
     mask: true,
   })
-  uni.navigateBack()
 }
 </script>
 

@@ -18,12 +18,12 @@ const orderTypes = [
     <view class="profile-panel">
       <!-- 情况1：已登录 -->
       <view class="overview" v-if="profile">
-        <navigator url="/pagesMember/profile/profile" hover-class="none">
+        <navigator url="/pagesMember/profileInfo/profileInfo" hover-class="none">
           <image class="avatar" mode="aspectFill" :src="profile?.avatar" />
         </navigator>
         <view class="meta">
           <view class="nickname"> {{ profile?.nickname || profile.account }} </view>
-          <navigator class="extra" url="/pagesMember/profile/profile" hover-class="none">
+          <navigator class="extra" url="/pagesMember/profileInfo/profileInfo" hover-class="none">
             <text class="update">更新头像昵称</text>
           </navigator>
         </view>
@@ -35,7 +35,7 @@ const orderTypes = [
             class="avatar gray"
             mode="aspectFill"
             src="http://yjy-xiaotuxian-dev.oss-cn-beijing.aliyuncs.com/picture/2021-04-06/db628d42-88a7-46e7-abb8-659448c33081.png"
-          ></image>
+          />
         </navigator>
         <view class="meta">
           <navigator url="/pages/login/login" hover-class="none" class="nickname"> 未登录 </navigator>

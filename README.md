@@ -1,3 +1,2 @@
-little rabbit project
-
-vue3 +Ts+Pinia
+基于黑马课程 vue3+TS 小兔鲜电商小程序
+优化了一些样式效果

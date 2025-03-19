@@ -69,14 +69,15 @@ const onFullLacation: UniHelper.RegionPickerOnChange = ({ detail }) => {
 
 const onSubmit = async () => {
   const { nickname, gender, birthday, profession } = profile.value
+  const [provinceCode = undefined, cityCode = undefined, countyCode = undefined] = fullLocationCode
   const params = reactive({
     nickname,
     gender,
     birthday,
     profession,
-    provinceCode: fullLocationCode[0] || '',
-    cityCode: fullLocationCode[1] || '',
-    countyCode: fullLocationCode[2] || '',
+    provinceCode,
+    cityCode,
+    countyCode,
   })
   const { result } = await putMemberProfileAPI(params)
   memberStore.profile!.nickname = result.nickname

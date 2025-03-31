@@ -106,10 +106,19 @@
 				{
 					"path": "profileInfo/profileInfo",
 					"style": {
-            			"navigationStyle": "custom",
-            			"navigationBarTextStyle": "white",
-            			"navigationBarTitleText": "个人信息"
-          			}
+						"navigationStyle": "custom",
+						"navigationBarTextStyle": "white",
+						"navigationBarTitleText": "个人信息"
+					}
+				},
+				{
+					"path": "address/address",
+					"style": {
+						"navigationBarTitleText": "地址"
+					}
+				},
+				{
+					"path": "address-form/address-form"
 				}
 			]
 		}

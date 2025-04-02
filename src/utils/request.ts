@@ -38,7 +38,7 @@ export const request = <T>(options: UniApp.RequestOptions) => {
           reject(res)
         } else {
           uni.showToast({
-            icon: 'success',
+            icon: 'error',
             title: (res.data as Data<T>).msg || '请求错误',
           })
           reject(res)

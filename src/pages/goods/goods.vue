@@ -1,3 +1,96 @@
+<script setup lang="ts">
+import { getGoodsByIdAPI } from '@/services/goods'
+import type { GoodsResult } from '@/types/goods'
+import { onLoad } from '@dcloudio/uni-app'
+import { computed, ref } from 'vue'
+import AddressPanel from './components/AddressPanel.vue'
+import ServicePanel from './components/ServicePanel.vue'
+import type {
+  SkuPopupEvent,
+  SkuPopupInstance,
+  SkuPopupLocaldata,
+} from '@/components/vk-data-goods-sku-popup/vk-data-goods-sku-popup'
+
+const { safeAreaInsets } = uni.getSystemInfoSync()
+const queryProps = defineProps<{
+  id: string
+}>()
+
+const goods = ref<GoodsResult>()
+const getGoodsDetailsData = async () => {
+  const { result } = await getGoodsByIdAPI(queryProps.id)
+  goods.value = result
+  localdata.value = {
+    _id: result.id,
+    name: result.name,
+    goods_thumb: result.mainPictures[0],
+    spec_list: result.specs.map((item) => {
+      return {
+        name: item.name,
+        list: item.values,
+      }
+    }),
+    sku_list: result.skus.map((skuItem) => {
+      return {
+        _id: skuItem.id,
+        goods_id: result.id,
+        goods_name: result.name,
+        image: skuItem.picture,
+        price: skuItem.price * 100,
+        stock: skuItem.inventory,
+        sku_name_arr: skuItem.specs.map((sepcsItem) => sepcsItem.valueName),
+      }
+    }),
+  }
+}
+const bannerIndex = ref(0)
+const swiperChange: UniHelper.SwiperOnChange = (ev) => {
+  bannerIndex.value = ev.detail!.current
+}
+
+const onImageTap = (url: string) => {
+  uni.previewImage({
+    current: url,
+    urls: goods.value!.mainPictures,
+  })
+}
+
+const popup = ref<{
+  open: (type?: 'top' | 'bottom') => void
+  close: () => void
+}>()
+
+const popupName = ref<'address' | 'service'>()
+const openPopup = (name: typeof popupName.value) => {
+  popupName.value = name
+  popup.value?.open('bottom')
+}
+
+const isShowSku = ref(false)
+const localdata = ref({} as SkuPopupLocaldata)
+enum skuMode {
+  Both = 1,
+  Cart = 2,
+  Buy = 3,
+}
+const mode = ref<skuMode>(skuMode.Both)
+const openSkuPopup = (val: skuMode) => {
+  isShowSku.value = true
+  mode.value = val
+}
+const skuPopupRef = ref<SkuPopupInstance>()
+const selectArrText = computed(() => {
+  return skuPopupRef.value?.selectArr?.join(' ').trim() || '请选择商品规格'
+})
+const onAddCart = (e: SkuPopupEvent) => {
+  console.log(e, '---')
+}
+
+onLoad(() => {
+  getGoodsDetailsData()
+})
+</script>
+
 <template>
   <scroll-view scroll-y class="viewport">
     <!-- 基本信息 -->
@@ -28,9 +121,11 @@
 
       <!-- 操作面板 -->
       <view class="action">
-        <view class="item arrow">
+        <view class="item arrow" @tap="openSkuPopup(skuMode.Both)">
           <text class="label">选择</text>
-          <text class="text ellipsis"> 请选择商品规格 </text>
+          <text class="text ellipsis">
+            {{ selectArrText }}
+          </text>
         </view>
         <view class="item arrow" @tap="openPopup('address')">
           <text class="label">送至</text>
@@ -101,8 +196,8 @@
       </navigator>
     </view>
     <view class="buttons">
-      <view class="addcart"> 加入购物车 </view>
-      <view class="buynow"> 立即购买 </view>
+      <view class="addcart" @tap="openSkuPopup(skuMode.Cart)"> 加入购物车 </view>
+      <view class="buynow" @tap="openSkuPopup(skuMode.Buy)"> 立即购买 </view>
     </view>
   </view>
 
@@ -111,53 +206,22 @@
     <AddressPanel v-if="popupName === 'address'" @close="popup?.close()" />
     <ServicePanel v-if="popupName === 'service'" @close="popup?.close()" />
   </uni-popup>
+  <!-- SKU组件 -->
+  <vk-data-goods-sku-popup
+    v-model="isShowSku"
+    :localdata="localdata"
+    ref="skuPopupRef"
+    :mode="mode"
+    add-cart-background-color="#FFA868"
+    buy-now-background-color="#27BA9B"
+    :actived-style="{
+      color: '#27BA9B',
+      borderColor: '#27BA9B',
+      backgroundColor: '#E9F8F5',
+    }"
+    @add-cart="onAddCart"
+  />
 </template>
-
-<script setup lang="ts">
-import { getGoodsByIdAPI } from '@/services/goods'
-import type { GoodsResult } from '@/types/goods'
-import { onLoad } from '@dcloudio/uni-app'
-import { ref } from 'vue'
-import AddressPanel from './components/AddressPanel.vue'
-import ServicePanel from './components/ServicePanel.vue'
-
-const { safeAreaInsets } = uni.getSystemInfoSync()
-const queryProps = defineProps<{
-  id: string
-}>()
-
-const goods = ref<GoodsResult>()
-const getGoodsDetailsData = async () => {
-  const { result } = await getGoodsByIdAPI(queryProps.id)
-  goods.value = result
-}
-const bannerIndex = ref(0)
-const swiperChange: UniHelper.SwiperOnChange = (ev) => {
-  bannerIndex.value = ev.detail!.current
-}
-
-const onImageTap = (url: string) => {
-  uni.previewImage({
-    current: url,
-    urls: goods.value!.mainPictures,
-  })
-}
-
-const popup = ref<{
-  open: (type?: 'top' | 'bottom') => void
-  close: () => void
-}>()
-
-const popupName = ref<'address' | 'service'>()
-const openPopup = (name: typeof popupName.value) => {
-  popupName.value = name
-  popup.value?.open('bottom')
-}
-
-onLoad(() => {
-  getGoodsDetailsData()
-})
-</script>
 
 <style lang="scss" scoped>
 page {

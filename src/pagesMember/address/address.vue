@@ -52,7 +52,7 @@ onShow(() => {
               </navigator>
             </view>
             <template #right>
-              <button class="delete-button" @tap="deleteAddress('0000')">删除</button>
+              <button class="delete-button" @tap="deleteAddress(item.id)">删除</button>
             </template>
           </uni-swipe-action-item>
         </uni-swipe-action>

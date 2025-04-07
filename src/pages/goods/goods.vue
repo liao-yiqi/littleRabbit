@@ -10,6 +10,7 @@ import type {
   SkuPopupInstance,
   SkuPopupLocaldata,
 } from '@/components/vk-data-goods-sku-popup/vk-data-goods-sku-popup'
+import { postMemberCartAPI } from '@/services/cart'
 
 const { safeAreaInsets } = uni.getSystemInfoSync()
 const queryProps = defineProps<{
@@ -82,8 +83,14 @@ const skuPopupRef = ref<SkuPopupInstance>()
 const selectArrText = computed(() => {
   return skuPopupRef.value?.selectArr?.join(' ').trim() || '请选择商品规格'
 })
-const onAddCart = (e: SkuPopupEvent) => {
-  console.log(e, '---')
+const onAddCart = async (e: SkuPopupEvent) => {
+  await postMemberCartAPI({ skuId: e._id, count: e.buy_num })
+  uni.showToast({
+    title: '添加成功',
+    icon: 'success',
+    mask: true,
+  })
+  isShowSku.value = false
 }
 
 onLoad(() => {

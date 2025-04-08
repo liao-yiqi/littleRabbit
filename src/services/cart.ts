@@ -15,3 +15,11 @@ export const getMemberCartAPI = () => {
     method: 'GET',
   })
 }
+
+export const deleteMemberCartAPI = (data: { ids: string[] }) => {
+  return request({
+    url: '/member/cart',
+    method: 'DELETE',
+    data,
+  })
+}

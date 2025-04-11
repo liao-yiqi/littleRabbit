@@ -1,14 +1,15 @@
 <script lang="ts" setup>
-import { deleteMemberAddressByIdAPI, getMemberAddressAPI } from '@/services/address'
+import { useGetAddress } from '@/composables'
+import { deleteMemberAddressByIdAPI } from '@/services/address'
+import { useAddressStore } from '@/stores/modules/address'
 import type { AddressItems } from '@/types/address'
 import { onShow } from '@dcloudio/uni-app'
-import { ref } from 'vue'
 
-const addressList = ref<AddressItems[]>([])
-const getAddressList = async () => {
-  const { result } = await getMemberAddressAPI()
-  addressList.value = result
-}
+const props = defineProps<{
+  isSetting: boolean
+}>()
+
+const { addressList, getAddressData } = useGetAddress()
 
 const deleteAddress = async (id: string) => {
   uni.showModal({
@@ -18,14 +19,22 @@ const deleteAddress = async (id: string) => {
       if (res.confirm) {
         await deleteMemberAddressByIdAPI(id)
         uni.showToast({ title: '删除成功', icon: 'success', mask: true })
-        getAddressList()
+        getAddressData()
       }
     },
   })
 }
 
+const onChangeAddress = (item: AddressItems) => {
+  // 防止在设置页面点击列表的时候返回上一页
+  if (props.isSetting) return
+  const addressStore = useAddressStore()
+  addressStore.changeSelectedAddress(item)
+  uni.navigateBack()
+}
+
 onShow(() => {
-  getAddressList()
+  getAddressData()
 })
 </script>
 
@@ -36,7 +45,7 @@ onShow(() => {
       <view v-if="addressList.length" class="address">
         <uni-swipe-action class="address-list">
           <uni-swipe-action-item class="item" v-for="item in addressList" :key="item.id">
-            <view class="item-content">
+            <view class="item-content" @tap="onChangeAddress(item)">
               <view class="user">
                 {{ item.receiver }}
                 <text class="contact">{{ item.contact }}</text>
@@ -47,6 +56,7 @@ onShow(() => {
                 class="edit"
                 hover-class="none"
                 :url="`/pagesMember/address-form/address-form?id=${item.id}`"
+                @tap.stop="() => {}"
               >
                 修改
               </navigator>

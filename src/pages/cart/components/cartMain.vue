@@ -88,6 +88,7 @@ const onGoPayment = () => {
       title: '请选择商品',
     })
   }
+  uni.navigateTo({ url: '/pagesOrder/createOrder/createOrder' })
 }
 
 onShow(() => {
@@ -454,6 +455,6 @@ $main-font: 'erabbit' !important;
   }
 }
 .toolbar-height {
-  height: 100rpx;
+  height: 150rpx;
 }
 </style>

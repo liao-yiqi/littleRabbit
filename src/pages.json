@@ -127,6 +127,17 @@
 					"path": "address-form/address-form"
 				}
 			]
+		},
+		{
+			"root": "pagesOrder",
+			"pages": [
+				{
+					"path": "createOrder/createOrder",
+					"style": {
+						"navigationBarTitleText": "填写订单"
+					}
+				}
+			]
 		}
 	],
 	"preloadRule": {

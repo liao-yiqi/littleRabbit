@@ -1,3 +1,5 @@
+import { getMemberAddressAPI } from '@/services/address'
+import type { AddressItems } from '@/types/address'
 import type { XtxGuessInstance } from '@/types/components'
 import { nextTick, ref } from 'vue'
 
@@ -47,5 +49,17 @@ export const useGoTop = () => {
     oldScrollTop,
     onGoTop,
     scrollTop,
+  }
+}
+
+export const useGetAddress = () => {
+  const addressList = ref<AddressItems[]>([])
+  const getAddressData = async () => {
+    const { result } = await getMemberAddressAPI()
+    addressList.value = result
+  }
+  return {
+    addressList,
+    getAddressData,
   }
 }

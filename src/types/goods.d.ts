@@ -1,3 +1,4 @@
+import type { AddressItems } from './address'
 import type { GoodsItem } from './global'
 
 // 商品详情结果

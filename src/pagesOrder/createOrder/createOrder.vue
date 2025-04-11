@@ -2,9 +2,10 @@
 import { getMemberAddressAPI, getMemberAddressById } from '@/services/address'
 import { getMemberOrderPreAPI, getMemberOrderPreNowAPI } from '@/services/order'
 import { useAddressStore } from '@/stores/modules/address'
+import type { AddressItems } from '@/types/address'
 import type { OrderPreResult } from '@/types/order'
 import { onLoad } from '@dcloudio/uni-app'
-import { computed, ref } from 'vue'
+import { computed, ref, watchEffect } from 'vue'
 
 const { safeAreaInsets } = uni.getSystemInfoSync()
 const props = defineProps<{
@@ -33,19 +34,24 @@ const getMemberOrderPreData = async () => {
 }
 
 const addressStore = useAddressStore()
-const selecteAddress = computed(() => {
+const selecteAddress = ref<AddressItems>()
+const getSelectAddress = async () => {
   // 判断当前是否从立即购买跳转
   if (props.addressId) {
-    getMemberAddressById(props.addressId).then(({ result }) => {
-      return result
-    })
+    const { result } = await getMemberAddressById(props.addressId)
+    selecteAddress.value = result
   } else {
-    return addressStore.selectedAddress || orderPre.value?.userAddresses.find((item) => item.isDefault)
+    selecteAddress.value =
+      addressStore.selectedAddress || orderPre.value?.userAddresses.find((item) => item.isDefault)
   }
-})
+}
 
 onLoad(() => {
+  getSelectAddress()
   getMemberOrderPreData()
+})
+watchEffect(() => {
+  getSelectAddress()
 })
 </script>
 

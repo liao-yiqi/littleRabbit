@@ -11,6 +11,7 @@ import type {
   SkuPopupLocaldata,
 } from '@/components/vk-data-goods-sku-popup/vk-data-goods-sku-popup'
 import { postMemberCartAPI } from '@/services/cart'
+import { useGetAddress } from '@/composables'
 
 const { safeAreaInsets } = uni.getSystemInfoSync()
 const queryProps = defineProps<{
@@ -20,6 +21,7 @@ const queryProps = defineProps<{
 const goods = ref<GoodsResult>()
 const getGoodsDetailsData = async () => {
   const { result } = await getGoodsByIdAPI(queryProps.id)
+  await getAddressData()
   goods.value = result
   localdata.value = {
     _id: result.id,
@@ -83,6 +85,24 @@ const skuPopupRef = ref<SkuPopupInstance>()
 const selectArrText = computed(() => {
   return skuPopupRef.value?.selectArr?.join(' ').trim() || '请选择商品规格'
 })
+
+const { addressList, getAddressData } = useGetAddress()
+const addressRef = ref<InstanceType<typeof AddressPanel>>()
+const selectAddressText = computed(() => {
+  const defaultAddress = addressList.value.find((item) => item.isDefault === 1)
+  if (defaultAddress) {
+    return {
+      address: `${defaultAddress.fullLocation} ${defaultAddress.address}`,
+      addressId: defaultAddress.id,
+    }
+  }
+  const { addressList: selectedAddress, addressId } = addressRef.value?.selectedAddress!
+  return {
+    address: selectedAddress.join(' ').trim() || '请选择收货地址',
+    addressId: addressId,
+  }
+})
+
 const onAddCart = async (e: SkuPopupEvent) => {
   await postMemberCartAPI({ skuId: e._id, count: e.buy_num })
   uni.showToast({
@@ -91,6 +111,12 @@ const onAddCart = async (e: SkuPopupEvent) => {
     mask: true,
   })
   isShowSku.value = false
+}
+
+const onBuyNow = async (e: SkuPopupEvent) => {
+  uni.navigateTo({
+    url: `/pagesOrder/createOrder/createOrder?skuId=${e._id}&count=${e.buy_num}&addressId=${selectAddressText.value.addressId}`,
+  })
 }
 
 onLoad(() => {
@@ -136,7 +162,9 @@ onLoad(() => {
         </view>
         <view class="item arrow" @tap="openPopup('address')">
           <text class="label">送至</text>
-          <text class="text ellipsis"> 请选择收获地址 </text>
+          <text class="text ellipsis">
+            {{ selectAddressText.address }}
+          </text>
         </view>
         <view @tap="openPopup('service')" class="item arrow">
           <text class="label">服务</text>
@@ -210,7 +238,12 @@ onLoad(() => {
 
   <!-- 弹出层 -->
   <uni-popup ref="popup" background-color="#fff">
-    <AddressPanel v-if="popupName === 'address'" @close="popup?.close()" />
+    <AddressPanel
+      ref="addressRef"
+      :addressList="addressList"
+      v-if="popupName === 'address'"
+      @close="popup?.close()"
+    />
     <ServicePanel v-if="popupName === 'service'" @close="popup?.close()" />
   </uni-popup>
   <!-- SKU组件 -->
@@ -227,6 +260,7 @@ onLoad(() => {
       backgroundColor: '#E9F8F5',
     }"
     @add-cart="onAddCart"
+    @buy-now="onBuyNow"
   />
 </template>
 

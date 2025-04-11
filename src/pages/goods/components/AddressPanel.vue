@@ -1,39 +1,63 @@
+<script setup lang="ts">
+import type { AddressItems } from '@/types/address'
+import { ref } from 'vue'
+
+const emit = defineEmits<{
+  (event: 'close'): void
+}>()
+
+const props = defineProps<{
+  addressList: AddressItems[]
+}>()
+
+const onChangeSelect = (item: AddressItems) => {
+  props.addressList.forEach((addressItem) => {
+    addressItem.isDefault = addressItem.id === item.id ? 1 : 0
+  })
+}
+
+const selectedAddress = ref<{ addressList: string[]; addressId: string }>()
+const onSelectAddress = async () => {
+  const selectedItem = props.addressList.find((item) => item.isDefault === 1)
+  selectedAddress.value = {
+    addressList: [selectedItem!.fullLocation, selectedItem!.address],
+    addressId: selectedItem!.id,
+  }
+  emit('close')
+}
+
+defineExpose({
+  selectedAddress,
+})
+</script>
+
 <template>
   <view class="address-panel">
     <!-- 关闭按钮 -->
-    <text class="close icon-close" @tap="emit('close')">x</text>
+    <text class="close icon-close" @tap="emit('close')"></text>
     <!-- 标题 -->
     <view class="title">配送至</view>
     <!-- 内容 -->
     <view class="content">
-      <view class="item">
-        <view class="user">李明 13824686868</view>
-        <view class="address">北京市顺义区后沙峪地区安平北街6号院</view>
-        <text class="icon icon-checked"></text>
-      </view>
-      <view class="item">
-        <view class="user">王东 13824686868</view>
-        <view class="address">北京市顺义区后沙峪地区安平北街6号院</view>
-        <text class="icon icon-ring"></text>
-      </view>
-      <view class="item">
-        <view class="user">张三 13824686868</view>
-        <view class="address">北京市朝阳区孙河安平北街6号院</view>
-        <text class="icon icon-ring"></text>
+      <view class="item" v-for="item in addressList" :key="item.id" @tap="onChangeSelect(item)">
+        <view class="user"> {{ item.receiver }} {{ item.contact }} </view>
+        <view class="address">{{ item.fullLocation }}{{ item.address }}</view>
+        <text class="icon" :class="[item.isDefault === 1 ? 'icon-checked' : 'icon-ring']"></text>
       </view>
     </view>
     <view class="footer">
-      <view class="button primary"> 新建地址 </view>
-      <view v-if="false" class="button primary">确定</view>
+      <view v-if="addressList.length" class="button primary" @tap="onSelectAddress">确定</view>
+      <navigator
+        v-else
+        url="/pagesMember/address-form/address-form"
+        hover-class="none"
+        class="button primary"
+      >
+        新建地址
+      </navigator>
     </view>
   </view>
 </template>
-
-<script setup lang="ts">
-const emit = defineEmits<{
-  (event: 'close'): void
-}>()
-</script>
 
 <style lang="scss">
 .address-panel {
@@ -84,9 +108,6 @@ const emit = defineEmits<{
   }
   .icon-checked {
     color: #27ba9b;
-  }
-  .icon-checked::after {
-    content: '✔';
   }
   .icon-ring {
     color: #444;

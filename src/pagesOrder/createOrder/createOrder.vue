@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { getMemberAddressAPI, getMemberAddressById } from '@/services/address'
-import { getMemberOrderPreAPI, getMemberOrderPreNowAPI } from '@/services/order'
+import { getMemberAddressById } from '@/services/address'
+import { getMemberOrderPreAPI, getMemberOrderPreNowAPI, postMemberOrderAPI } from '@/services/order'
 import { useAddressStore } from '@/stores/modules/address'
 import type { AddressItems } from '@/types/address'
-import type { OrderPreResult } from '@/types/order'
+import type { OrderCreateParams, OrderPreResult } from '@/types/order'
 import { onLoad } from '@dcloudio/uni-app'
 import { computed, ref, watchEffect } from 'vue'
 
@@ -46,8 +46,26 @@ const getSelectAddress = async () => {
   }
 }
 
+const buyerMessage = ref<string>()
+const onSubmitOrder = async () => {
+  if (!selecteAddress.value?.id) return uni.showToast({ title: '请选择收货地址', icon: 'none' })
+  const { result } = await postMemberOrderAPI({
+    addressId: selecteAddress.value?.id!,
+    deliveryTimeType: activeDelivery.value.type,
+    buyerMessage: buyerMessage.value!,
+    goods: orderPre.value!.goods.map((item) => {
+      return {
+        count: item.count,
+        skuId: item.skuId,
+      }
+    }),
+    payChannel: 2,
+    payType: 1,
+  })
+  uni.redirectTo({ url: `/pagesOrder/orderDetail/orderDetail?id=${result.id}` })
+}
+
 onLoad(() => {
-  getSelectAddress()
   getMemberOrderPreData()
 })
 watchEffect(() => {
@@ -105,7 +123,12 @@ watchEffect(() => {
       </view>
       <view class="item">
         <text class="text">订单备注</text>
-        <input class="input" :cursor-spacing="30" placeholder="建议留言前先与商家沟通确认" />
+        <input
+          class="input"
+          :cursor-spacing="30"
+          placeholder="建议留言前先与商家沟通确认"
+          v-model="buyerMessage"
+        />
       </view>
     </view>
     <!-- 支付金额 -->
@@ -127,7 +150,7 @@ watchEffect(() => {
       <view class="total-pay symbol">
         <text class="number">{{ orderPre?.summary.totalPayPrice.toFixed(2) }}</text>
       </view>
-      <view class="button" :class="{ disabled: true }"> 提交订单 </view>
+      <view class="button" :class="{ disabled: !selecteAddress?.id }" @tap="onSubmitOrder"> 提交订单 </view>
     </view>
   </scroll-view>
 </template>

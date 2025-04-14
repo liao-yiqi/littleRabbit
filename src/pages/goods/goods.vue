@@ -95,11 +95,12 @@ const selectAddressText = computed(() => {
       address: `${defaultAddress.fullLocation} ${defaultAddress.address}`,
       addressId: defaultAddress.id,
     }
-  }
-  const { addressList: selectedAddress, addressId } = addressRef.value?.selectedAddress!
-  return {
-    address: selectedAddress.join(' ').trim() || '请选择收货地址',
-    addressId: addressId,
+  } else if (addressRef.value) {
+    const { addressList: selectedAddress, addressId } = addressRef.value?.selectedAddress!
+    return {
+      address: selectedAddress.join(' ').trim() || '请选择收货地址',
+      addressId: addressId,
+    }
   }
 })
 
@@ -115,7 +116,7 @@ const onAddCart = async (e: SkuPopupEvent) => {
 
 const onBuyNow = async (e: SkuPopupEvent) => {
   uni.navigateTo({
-    url: `/pagesOrder/createOrder/createOrder?skuId=${e._id}&count=${e.buy_num}&addressId=${selectAddressText.value.addressId}`,
+    url: `/pagesOrder/createOrder/createOrder?skuId=${e._id}&count=${e.buy_num}&addressId=${selectAddressText?.value?.addressId}`,
   })
 }
 
@@ -163,7 +164,7 @@ onLoad(() => {
         <view class="item arrow" @tap="openPopup('address')">
           <text class="label">送至</text>
           <text class="text ellipsis">
-            {{ selectAddressText.address }}
+            {{ selectAddressText?.address }}
           </text>
         </view>
         <view @tap="openPopup('service')" class="item arrow">

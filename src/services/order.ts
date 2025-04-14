@@ -1,4 +1,4 @@
-import type { OrderCreateParams, OrderPreResult } from '@/types/order'
+import type { OrderCreateParams, OrderPreResult, OrderResult } from '@/types/order'
 import { request } from '@/utils/request'
 
 export const getMemberOrderPreAPI = () => {
@@ -21,5 +21,19 @@ export const postMemberOrderAPI = (data: OrderCreateParams) => {
     url: '/member/order',
     method: 'POST',
     data,
+  })
+}
+
+export const getMemberOrderByIdAPI = (id: string) => {
+  return request<OrderResult>({
+    url: `/member/order/${id}`,
+    method: 'GET',
+  })
+}
+
+export const getMemberOrderRepurchaseByIdAPI = (id: string) => {
+  return request<OrderPreResult>({
+    url: `/member/order/repurchase/${id}`,
+    method: 'GET',
   })
 }

@@ -1,16 +1,11 @@
 <script setup lang="ts">
-import { OrderState, orderStateList } from '@/services/contants'
-import { getMemberOrderByIdAPI } from '@/services/order'
-import type { OrderResult } from '@/types/order'
-import { onLoad, onReady } from '@dcloudio/uni-app'
+import { useGuessList } from '@/composables'
 import { ref } from 'vue'
-import PageSkeleton from './components/PageSkeleton.vue'
 
+// 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
-const props = defineProps<{
-  id: string
-}>()
-
+// 猜你喜欢
+const { guessRef, onScrolltolower } = useGuessList()
 // 弹出层组件
 const popup = ref<{
   open: (type?: 'top' | 'bottom') => void
@@ -20,99 +15,48 @@ const popup = ref<{
 const reasonList = ref(['商品无货', '不想要了', '商品信息填错了', '地址信息填写错误', '商品降价', '其它'])
 // 订单取消原因
 const reason = ref('')
-
-// 获取页面栈
-const pages = getCurrentPages()
-// 获取当前页面实例
-const pageInstance = pages.at(-1) as any
-
-onReady(() => {
-  // 动画效果,导航栏背景色
-  pageInstance.animate(
-    '.navbar',
-    [{ backgroundColor: 'transparent' }, { backgroundColor: '#f8f8f8' }],
-    1000,
-    {
-      scrollSource: '#scroller',
-      timeRange: 1000,
-      startScrollOffset: 0,
-      endScrollOffset: 50,
-    },
-  )
-  // 动画效果,导航栏标题
-  pageInstance.animate('.navbar .title', [{ color: 'transparent' }, { color: '#000' }], 1000, {
-    scrollSource: '#scroller',
-    timeRange: 1000,
-    startScrollOffset: 0,
-    endScrollOffset: 50,
-  })
-  // 动画效果,导航栏返回按钮
-  pageInstance.animate('.navbar .back', [{ color: '#fff' }, { color: '#000' }], 1000, {
-    scrollSource: '#scroller',
-    timeRange: 1000,
-    startScrollOffset: 0,
-    endScrollOffset: 50,
-  })
-})
-
-const memberOrderData = ref<OrderResult>()
-const getMemberOrderByIdData = async () => {
-  const { result } = await getMemberOrderByIdAPI(props.id)
-  memberOrderData.value = result
+// 复制内容
+const onCopy = (id: string) => {
+  // 设置系统剪贴板的内容
+  uni.setClipboardData({ data: id })
 }
-const onTimeup = () => {
-  // 修改订单状态为已取消
-  memberOrderData.value!.orderState = OrderState.YiQuXiao
-}
-
-onLoad(() => {
-  getMemberOrderByIdData()
-})
+// 获取页面参数
+const query = defineProps<{
+  id: string
+}>()
 </script>
 
 <template>
+  <!-- 自定义导航栏: 默认透明不可见, scroll-view 滚动到 50 时展示 -->
   <view class="navbar" :style="{ paddingTop: safeAreaInsets?.top + 'px' }">
     <view class="wrap">
-      <navigator
-        v-if="pages.length > 1"
-        url="/pages/"
-        open-type="navigateBack"
-        class="back icon-left"
-      ></navigator>
+      <navigator v-if="true" open-type="navigateBack" class="back icon-left"></navigator>
       <navigator v-else url="/pages/index/index" open-type="switchTab" class="back icon-home"> </navigator>
       <view class="title">订单详情</view>
     </view>
   </view>
-  <scroll-view scroll-y class="viewport" id="scroller">
-    <!-- 订单状态 -->
-    <template v-if="memberOrderData">
-      <view class="overview" :style="{paddingTop: safeAreaInsets!.top +20+ 'px'}">
-        <!-- 待付款状态 -->
-        <template v-if="memberOrderData.orderState === OrderState.DaiFuKuan">
-          <view class="status icon-clock">待付款</view>
-          <view class="tip">
-            <text class="money">应付金额：$100.00</text>
+  <scroll-view scroll-y class="viewport" id="scroller" @scrolltolower="onScrolltolower">
+    <template v-if="true">
+      <!-- 订单状态 -->
+      <view class="overview" :style="{ paddingTop: safeAreaInsets!.top + 20 + 'px' }">
+        <!-- 待付款状态:展示去支付按钮和倒计时 -->
+        <template v-if="true">
+          <view class="status icon-clock">等待付款</view>
+          <view class="tips">
+            <text class="money">应付金额: ¥ 99.00</text>
             <text class="time">支付剩余</text>
-            <uni-countdown
-              :second="memberOrderData.countdown"
-              color="#fff"
-              splitor-color="#fff"
-              :show-day="false"
-              :show-colon="false"
-              @timeup="onTimeup"
-            />
+            00 时 29 分 59 秒
           </view>
           <view class="button">去支付</view>
         </template>
-        <!-- 其他订单状态 -->
+        <!-- 其他订单状态:展示再次购买按钮 -->
         <template v-else>
-          <view class="status">
-            {{ orderStateList[memberOrderData.orderState].text }}
-          </view>
+          <!-- 订单状态文字 -->
+          <view class="status"> 待付款 </view>
           <view class="button-group">
             <navigator
               class="button"
-              :url="`/pagesOrder/createOrder/createOrder?orderId=${props.id}`"
+              :url="`/pagesOrder/create/create?orderId=${query.id}`"
               hover-class="none"
             >
               再次购买
@@ -127,46 +71,45 @@ onLoad(() => {
         <!-- 订单物流信息 -->
         <view v-for="item in 1" :key="item" class="item">
           <view class="message">
-            已在广州市天河区天河路100号中通快递发出，感谢使用菜鸟驿站，期待再次为您服务。
+            您已在广州市天河区黑马程序员完成取件，感谢使用菜鸟驿站，期待再次为您服务。
           </view>
-          <view class="date">2023-04-14 13:14:20</view>
+          <view class="date"> 2023-04-14 13:14:20 </view>
         </view>
         <!-- 用户收货地址 -->
         <view class="locate">
-          <view class="user">
-            {{ memberOrderData?.receiverContact }}
-            {{ memberOrderData?.receiverMobile }}
-          </view>
-          <view class="address">
-            {{ memberOrderData?.receiverAddress }}
-          </view>
+          <view class="user"> 张三 13333333333 </view>
+          <view class="address"> 广东省 广州市 天河区 黑马程序员 </view>
         </view>
       </view>
+
       <!-- 商品信息 -->
       <view class="goods">
         <view class="item">
           <navigator
             class="navigator"
-            v-for="item in memberOrderData.skus"
-            :key="item.spuId"
-            :url="`/pages/goods/goods?id=${item.id}`"
+            v-for="item in 2"
+            :key="item"
+            :url="`/pages/goods/goods?id=${item}`"
             hover-class="none"
           >
-            <image class="cover" :src="item.image" />
+            <image
+              class="cover"
+              src="https://yanxuan-item.nosdn.127.net/c07edde1047fa1bd0b795bed136c2bb2.jpg"
+            ></image>
             <view class="meta">
-              <view class="name ellipsis">{{ item.name }}</view>
-              <view class="type">{{ item.attrsText }}</view>
+              <view class="name ellipsis">ins风小碎花泡泡袖衬110-160cm</view>
+              <view class="type">藏青小花， 130</view>
               <view class="price">
                 <view class="actual">
                   <text class="symbol">¥</text>
-                  <text>{{ item.curPrice }}</text>
+                  <text>99.00</text>
                 </view>
               </view>
-              <view class="quantity">x{{ item.quantity }}</view>
+              <view class="quantity">x1</view>
             </view>
           </navigator>
           <!-- 待评价状态:展示按钮 -->
-          <view class="action" v-if="memberOrderData.orderState === OrderState.DaiPingJia">
+          <view class="action" v-if="true">
             <view class="button primary">申请售后</view>
             <navigator url="" class="button"> 去评价 </navigator>
           </view>
@@ -174,29 +117,34 @@ onLoad(() => {
         <!-- 合计 -->
         <view class="total">
           <view class="row">
-            <view class="text">商品总价：</view>
-            <view class="symbol">{{ memberOrderData.totalMoney }}</view>
+            <view class="text">商品总价: </view>
+            <view class="symbol">99.00</view>
           </view>
           <view class="row">
-            <view class="text">运费：</view>
-            <view class="symbol">1{{ memberOrderData.postFee }}</view>
+            <view class="text">运费: </view>
+            <view class="symbol">10.00</view>
           </view>
           <view class="row">
-            <view class="text">应付金额：</view>
-            <view class="symbol primary">{{ memberOrderData.payMoney }}</view>
+            <view class="text">应付金额: </view>
+            <view class="symbol primary">109.00</view>
           </view>
         </view>
       </view>
+
       <!-- 订单信息 -->
       <view class="detail">
         <view class="title">订单信息</view>
         <view class="row">
-          <view class="item"> 订单编号: {{ props.id }} <text class="copy">复制</text> </view>
-          <view class="item">下单时间: {{ memberOrderData.createTime }}</view>
+          <view class="item">
+            订单编号: {{ query.id }} <text class="copy" @tap="onCopy(query.id)">复制</text>
+          </view>
+          <view class="item">下单时间: 2023-04-14 13:14:20</view>
         </view>
       </view>
+
       <!-- 猜你喜欢 -->
       <XtxGuess ref="guessRef" />
+
       <!-- 底部操作栏 -->
       <view class="toolbar-height" :style="{ paddingBottom: safeAreaInsets?.bottom + 'px' }"></view>
       <view class="toolbar" :style="{ paddingBottom: safeAreaInsets?.bottom + 'px' }">
@@ -209,7 +157,7 @@ onLoad(() => {
         <template v-else>
           <navigator
             class="button secondary"
-            :url="`/pagesOrder/create/create?orderId=${props.id}`"
+            :url="`/pagesOrder/create/create?orderId=${query.id}`"
             hover-class="none"
           >
             再次购买
@@ -254,6 +202,7 @@ page {
   height: 100%;
   overflow: hidden;
 }
+
 .navbar {
   width: 750rpx;
   color: #000;
@@ -261,26 +210,32 @@ page {
   top: 0;
   left: 0;
   z-index: 9;
+  /* background-color: #f8f8f8; */
   background-color: transparent;
+
   .wrap {
     position: relative;
+
     .title {
       height: 44px;
       display: flex;
       justify-content: center;
       align-items: center;
       font-size: 32rpx;
+      /* color: #000; */
       color: transparent;
     }
+
     .back {
       position: absolute;
       left: 0;
       height: 44px;
       width: 44px;
-      font-size: 40rpx;
+      font-size: 44rpx;
       display: flex;
       align-items: center;
       justify-content: center;
+      /* color: #000; */
       color: #fff;
     }
   }
@@ -294,28 +249,40 @@ page {
   display: flex;
   flex-direction: column;
   align-items: center;
+
   line-height: 1;
   padding-bottom: 30rpx;
   color: #fff;
   background-image: url(https://pcapi-xiaotuxian-front-devtest.itheima.net/miniapp/images/order_bg.png);
   background-size: cover;
+
   .status {
     font-size: 36rpx;
-    &::before {
-      margin-right: 6rpx;
-      font-weight: 500;
-    }
   }
 
-  .tip {
+  .status::before {
+    margin-right: 6rpx;
+    font-weight: 500;
+  }
+
+  .tips {
     margin: 30rpx 0;
     display: flex;
     font-size: 14px;
     align-items: center;
+
     .money {
       margin-right: 30rpx;
     }
   }
+
+  .button-group {
+    margin-top: 30rpx;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
   .button {
     width: 260rpx;
     height: 64rpx;
@@ -327,12 +294,6 @@ page {
     border-radius: 68rpx;
     background-color: #fff;
   }
-  .button-group {
-    margin-top: 30rpx;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
 }
 
 .shipment {
@@ -341,19 +302,7 @@ page {
   margin: 20rpx 20rpx 0;
   border-radius: 10rpx;
   background-color: #fff;
-  .item {
-    background-image: url(https://pcapi-xiaotuxian-front-devtest.itheima.net/miniapp/images/car.png);
-    border-bottom: 1rpx solid #eee;
-    position: relative;
-    .message {
-      font-size: 26rpx;
-      color: #444;
-    }
-    .date {
-      font-size: 24rpx;
-      color: #666;
-    }
-  }
+
   .locate,
   .item {
     min-height: 120rpx;
@@ -362,13 +311,32 @@ page {
     background-repeat: no-repeat;
     background-position: 6rpx center;
   }
+
   .locate {
     background-image: url(https://pcapi-xiaotuxian-front-devtest.itheima.net/miniapp/images/locate.png);
+
     .user {
       font-size: 26rpx;
       color: #444;
     }
+
     .address {
+      font-size: 24rpx;
+      color: #666;
+    }
+  }
+
+  .item {
+    background-image: url(https://pcapi-xiaotuxian-front-devtest.itheima.net/miniapp/images/car.png);
+    border-bottom: 1rpx solid #eee;
+    position: relative;
+
+    .message {
+      font-size: 26rpx;
+      color: #444;
+    }
+
+    .date {
       font-size: 24rpx;
       color: #666;
     }
@@ -380,19 +348,23 @@ page {
   padding: 0 20rpx;
   border-radius: 10rpx;
   background-color: #fff;
+
   .item {
     padding: 30rpx 0;
     border-bottom: 1rpx solid #eee;
+
     .navigator {
       display: flex;
       margin: 20rpx 0;
     }
+
     .cover {
       width: 170rpx;
       height: 170rpx;
       border-radius: 10rpx;
       margin-right: 20rpx;
     }
+
     .meta {
       flex: 1;
       display: flex;
@@ -400,11 +372,13 @@ page {
       justify-content: center;
       position: relative;
     }
+
     .name {
       height: 80rpx;
       font-size: 26rpx;
       color: #444;
     }
+
     .type {
       line-height: 1.8;
       padding: 0 15rpx;
@@ -415,25 +389,31 @@ page {
       color: #888;
       background-color: #f7f7f8;
     }
+
     .price {
       display: flex;
       margin-top: 6rpx;
       font-size: 24rpx;
     }
+
     .symbol {
       font-size: 20rpx;
     }
+
     .original {
       color: #999;
       text-decoration: line-through;
     }
+
     .actual {
       margin-left: 10rpx;
       color: #444;
     }
+
     .text {
       font-size: 22rpx;
     }
+
     .quantity {
       position: absolute;
       bottom: 0;
@@ -441,6 +421,7 @@ page {
       font-size: 24rpx;
       color: #444;
     }
+
     .action {
       display: flex;
       flex-direction: row-reverse;
@@ -466,6 +447,7 @@ page {
       }
     }
   }
+
   .total {
     line-height: 1;
     font-size: 26rpx;
@@ -500,6 +482,7 @@ page {
   color: #666;
   border-radius: 10rpx;
   background-color: #fff;
+
   .title {
     font-size: 30rpx;
     color: #444;

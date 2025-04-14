@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import { getMemberAddressById } from '@/services/address'
-import { getMemberOrderPreAPI, getMemberOrderPreNowAPI, postMemberOrderAPI } from '@/services/order'
+import {
+  getMemberOrderPreAPI,
+  getMemberOrderPreNowAPI,
+  getMemberOrderRepurchaseByIdAPI,
+  postMemberOrderAPI,
+} from '@/services/order'
 import { useAddressStore } from '@/stores/modules/address'
 import type { AddressItems } from '@/types/address'
 import type { OrderCreateParams, OrderPreResult } from '@/types/order'
@@ -12,6 +17,7 @@ const props = defineProps<{
   skuId: string
   count: string
   addressId: string
+  orderId: string
 }>()
 const deliveryList = ref([
   { type: 1, text: '时间不限 (周一至周日)' },
@@ -23,9 +29,12 @@ const activeDelivery = computed(() => deliveryList.value[activeIndex.value])
 
 const orderPre = ref<OrderPreResult>()
 const getMemberOrderPreData = async () => {
-  const { skuId, count } = props
+  const { skuId, count, orderId } = props
   if (skuId && count) {
     const { result } = await getMemberOrderPreNowAPI({ skuId, count })
+    orderPre.value = result
+  } else if (orderId) {
+    const { result } = await getMemberOrderRepurchaseByIdAPI(orderId)
     orderPre.value = result
   } else {
     const { result } = await getMemberOrderPreAPI()

@@ -1,4 +1,11 @@
-import type { OrderCreateParams, OrderLogisticResult, OrderPreResult, OrderResult } from '@/types/order'
+import type {
+  OrderCreateParams,
+  OrderListParams,
+  OrderListResult,
+  OrderLogisticResult,
+  OrderPreResult,
+  OrderResult,
+} from '@/types/order'
 import { request } from '@/utils/request'
 
 export const getMemberOrderPreAPI = () => {
@@ -83,6 +90,32 @@ export const deleteMemberOrderAPI = (data: { ids: string[] }) => {
   return request({
     url: `/member/order`,
     method: 'DELETE',
+    data,
+  })
+}
+
+/**
+ * 获取订单列表
+ * @param data orderState 订单状态
+ */
+export const getMemberOrderAPI = (data: OrderListParams) => {
+  return request<OrderListResult>({
+    url: '/member/order',
+    method: 'GET',
+    data,
+  })
+}
+
+/**
+ * 取消订单
+ * @description 仅在订单状态为待付款时，可取消订单。
+ * @param id 订单id
+ * @param data cancelReason 取消理由
+ */
+export const getMemberOrderCancelByIdAPI = (id: string, data: { cancelReason: string }) => {
+  return request<OrderResult>({
+    method: 'PUT',
+    url: `/member/order/${id}/cancel`,
     data,
   })
 }

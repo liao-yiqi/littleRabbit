@@ -7,7 +7,7 @@ const memberStore = useMemberStore()
 const requestInterceptor = {
   invoke(options: UniApp.RequestOptions) {
     if (!options.url.startsWith('http')) options.url = baseURL + options.url
-    options.timeout = 10000
+    options.timeout = 60000
     options.header = {
       ...options.header,
       'source-client': 'miniapp',
